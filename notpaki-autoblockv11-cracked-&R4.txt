@@ -1,0 +1,2257 @@
+if game.PlaceId == 10449761463 or game.PlaceId == 130818724007978 or game.PlaceId == 131048399685555 then
+    local CombatGUI = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+    local TitleLabel = Instance.new("TextLabel")
+    local ToggleButton = Instance.new("TextButton")
+    local AutoBlockButton = Instance.new("TextButton")
+    local CounterNotifierButton = Instance.new("TextButton")
+    local SettingsButton = Instance.new("ImageButton")
+    local SettingsFrame = Instance.new("Frame")
+    local CloseRangeTextBox = Instance.new("TextBox")
+    local LongRangeTextBox = Instance.new("TextBox")
+    local CounterRangeTextBox = Instance.new("TextBox")
+    local UICorner = Instance.new("UICorner")
+    local AutoBlockLabel = Instance.new("TextLabel")
+    local CounterNotifierLabel = Instance.new("TextLabel")
+    local DefaultSettingsButton = Instance.new("TextButton")
+    
+    task.wait(0.9)
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Note",
+        Text = "Remember to setup the script before using (or default setup)",
+        Duration = 3,
+    })
+    
+    function ExecuteCamlock(response)
+        if response == "Yes" then
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local LocalPlayer = Players.LocalPlayer
+            local Mouse = game.Players.LocalPlayer:GetMouse()
+            local CameraLockEnabled = false
+            local PredictionAmount = 0.16
+            local Smoothness = 0.2
+            local CameraSpeed = 0.14
+            local FOV = 9
+            local CameraOffset = 7.282
+            local PlayerMouse = game:GetService("Players").LocalPlayer:GetMouse()
+            local CamlockActive = true
+            getgenv().CamlockKey = "c"
+            
+            function FindNearestEnemy()
+                local ClosestDistance = math.huge
+                local TargetPart = nil
+                local ScreenCenter = Vector2.new(game:GetService("GuiService"):GetScreenResolution().X / 2, game:GetService("GuiService"):GetScreenResolution().Y / 2)
+                
+                for _, Player in ipairs(game:GetService("Players"):GetPlayers()) do
+                    if Player ~= LocalPlayer then
+                        local Character = Player.Character
+                        if Character and Character:FindFirstChild("HumanoidRootPart") and Character.Humanoid.Health > 0 then
+                            local ScreenPosition, OnScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(Character.HumanoidRootPart.Position)
+                            if OnScreen then
+                                local Distance = (ScreenCenter - Vector2.new(ScreenPosition.X, ScreenPosition.Y)).Magnitude
+                                if Distance < ClosestDistance then
+                                    TargetPart = Character.HumanoidRootPart
+                                    ClosestDistance = Distance
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                local LiveFolder = game:GetService("Workspace"):FindFirstChild("Live")
+                if LiveFolder then
+                    local WeakestDummy = LiveFolder:FindFirstChild("Weakest Dummy")
+                    if WeakestDummy and WeakestDummy:FindFirstChild("HumanoidRootPart") then
+                        local ScreenPosition, OnScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(WeakestDummy.HumanoidRootPart.Position)
+                        if OnScreen then
+                            local Distance = (ScreenCenter - Vector2.new(ScreenPosition.X, ScreenPosition.Y)).Magnitude
+                            if Distance < ClosestDistance then
+                                TargetPart = WeakestDummy.HumanoidRootPart
+                                ClosestDistance = Distance
+                            end
+                        end
+                    end
+                end
+                return TargetPart
+            end
+            
+            local CurrentTarget = nil
+            
+            RunService.Heartbeat:Connect(function()
+                if CameraLockEnabled == true and CurrentTarget then
+                    local Camera = workspace.CurrentCamera
+                    Camera.CFrame = CFrame.new(Camera.CFrame.p, CurrentTarget.Position + CurrentTarget.Velocity * PredictionAmount)
+                end
+            end)
+            
+            PlayerMouse.KeyDown:Connect(function(Key)
+                if Key == getgenv().CamlockKey then
+                    CamlockActive = not CamlockActive
+                    if CamlockActive then
+                        CurrentTarget = FindNearestEnemy()
+                        CameraLockEnabled = true
+                    elseif CurrentTarget ~= nil then
+                        CurrentTarget = nil
+                        CameraLockEnabled = false
+                    end
+                end
+            end)
+            
+            local CamlockGUI = Instance.new("ScreenGui")
+            CamlockGUI.Name = "CamlockGUI"
+            CamlockGUI.Parent = game.CoreGui
+            
+            local CamlockFrame = Instance.new("Frame")
+            local CamlockUICorner = Instance.new("UICorner")
+            local CamlockToggleButton = Instance.new("TextButton")
+            local ButtonUICorner = Instance.new("UICorner")
+            
+            CamlockFrame.Parent = CamlockGUI
+            CamlockFrame.BackgroundColor3 = Color3.fromRGB(43, 43, 43)
+            CamlockFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+            CamlockFrame.BorderSizePixel = 0
+            CamlockFrame.Position = UDim2.new(0.133798108, 0, 0.20107238, 0)
+            CamlockFrame.Size = UDim2.new(0, 132, 0, 60)
+            CamlockFrame.Active = true
+            CamlockFrame.Draggable = true
+            
+            local function CenterCamlockFrame()
+                CamlockFrame.Position = UDim2.new(0.63, -CamlockFrame.AbsoluteSize.X / 2, 0.2, -CamlockFrame.AbsoluteSize.Y / 2)
+            end
+            
+            CenterCamlockFrame()
+            CamlockFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(CenterCamlockFrame)
+            
+            CamlockUICorner.Parent = CamlockFrame
+            
+            CamlockToggleButton.Parent = CamlockFrame
+            CamlockToggleButton.BackgroundColor3 = Color3.fromRGB(43, 43, 43)
+            CamlockToggleButton.BackgroundTransparency = 5
+            CamlockToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+            CamlockToggleButton.BorderSizePixel = 0
+            CamlockToggleButton.Position = UDim2.new(0.13, 0, 0.21971429, 0)
+            CamlockToggleButton.Size = UDim2.new(0, 100, 0, 32)
+            CamlockToggleButton.Font = Enum.Font.GothamBold
+            CamlockToggleButton.Text = "Press to enable Camlock"
+            CamlockToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            CamlockToggleButton.TextScaled = true
+            CamlockToggleButton.TextWrapped = true
+            
+            local CamlockButtonState = true
+            
+            CamlockToggleButton.MouseButton1Click:Connect(function()
+                CamlockButtonState = not CamlockButtonState
+                if not CamlockButtonState then
+                    CamlockToggleButton.Text = "Camlock Enabled"
+                    CameraLockEnabled = true
+                    CurrentTarget = FindNearestEnemy()
+                else
+                    CamlockToggleButton.Text = "Camlock Disabled"
+                    CameraLockEnabled = false
+                    CurrentTarget = nil
+                end
+            end)
+            
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Made by notpaki",
+                Text = "Thanks for using Combat Gui",
+                Duration = 2.6,
+            })
+            
+        elseif response == "No" then
+        end
+    end
+    
+    local ResponseFunction = Instance.new("BindableFunction")
+    ResponseFunction.OnInvoke = ExecuteCamlock
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Hey",
+        Text = "Do you want to execute Camlock script?",
+        Duration = 85,
+        Button1 = "Yes",
+        Button2 = "No",
+        Callback = ResponseFunction,
+    })
+    
+    CombatGUI.Name = "CombatGUI"
+    CombatGUI.Parent = game.CoreGui
+    CombatGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = CombatGUI
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0, 15, 0, 100)
+    MainFrame.Size = UDim2.new(0, 250, 0, 140)
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+    
+    TitleLabel.Name = "Title"
+    TitleLabel.Parent = MainFrame
+    TitleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    TitleLabel.BorderSizePixel = 0
+    TitleLabel.Size = UDim2.new(1, 0, 0, 35)
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.Text = "TSB | Combat Gui"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.TextSize = 17
+    UICorner:Clone().Parent = TitleLabel
+    
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Parent = TitleLabel
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    ToggleButton.BorderSizePixel = 0
+    ToggleButton.Position = UDim2.new(1, -31.5, 0.005, 0)
+    ToggleButton.Size = UDim2.new(0, 30.6, 0.955, 0)
+    ToggleButton.Font = Enum.Font.GothamBold
+    ToggleButton.Text = "-"
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.TextSize = 19
+    UICorner:Clone().Parent = ToggleButton
+    
+    AutoBlockLabel.Name = "AutoBlockLabel"
+    AutoBlockLabel.Parent = MainFrame
+    AutoBlockLabel.Text = "Auto Block"
+    AutoBlockLabel.TextSize = 18
+    AutoBlockLabel.Position = UDim2.new(0.5, 0, 0.6, -40)
+    AutoBlockLabel.TextColor3 = Color3.fromRGB(80, 80, 80)
+    AutoBlockLabel.Font = Enum.Font.Gotham
+    
+    CounterNotifierLabel.Name = "CounterNotifierLabel"
+    CounterNotifierLabel.Parent = MainFrame
+    CounterNotifierLabel.Text = "Counter Notifier"
+    CounterNotifierLabel.TextSize = 18
+    CounterNotifierLabel.Position = UDim2.new(0.5, 0, 0.6, 10)
+    CounterNotifierLabel.TextColor3 = Color3.fromRGB(80, 80, 80)
+    CounterNotifierLabel.Font = Enum.Font.Gotham
+    
+    AutoBlockButton.Name = "AutoBlockButton"
+    AutoBlockButton.Parent = MainFrame
+    AutoBlockButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    AutoBlockButton.BorderSizePixel = 0
+    AutoBlockButton.Position = UDim2.new(0.14, 0, 0.6, -30)
+    AutoBlockButton.Size = UDim2.new(0.7, 0, 0, 33)
+    AutoBlockButton.Font = Enum.Font.GothamBold
+    AutoBlockButton.Text = "Press to enable Auto Block"
+    AutoBlockButton.TextColor3 = Color3.fromRGB(250, 250, 250)
+    AutoBlockButton.TextScaled = true
+    UICorner:Clone().Parent = AutoBlockButton
+    
+    CounterNotifierButton.Name = "CounterNotifierButton"
+    CounterNotifierButton.Parent = MainFrame
+    CounterNotifierButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CounterNotifierButton.BorderSizePixel = 0
+    CounterNotifierButton.Position = UDim2.new(0.14, 0, 0.6, 20)
+    CounterNotifierButton.Size = UDim2.new(0.7, 0, 0, 33)
+    CounterNotifierButton.Font = Enum.Font.GothamBold
+    CounterNotifierButton.Text = "Press to enable Counter Notifier"
+    CounterNotifierButton.TextColor3 = Color3.fromRGB(250, 250, 250)
+    CounterNotifierButton.TextScaled = true
+    UICorner:Clone().Parent = CounterNotifierButton
+    
+    SettingsButton.Name = "SettingsButton"
+    SettingsButton.Parent = MainFrame
+    SettingsButton.BackgroundTransparency = 1
+    SettingsButton.Position = UDim2.new(1, -25, 0.8, 0)
+    SettingsButton.Size = UDim2.new(0, 21, 0, 21)
+    SettingsButton.Image = "rbxassetid://10734950309"
+    
+    SettingsFrame.Name = "SettingsFrame"
+    SettingsFrame.Parent = MainFrame
+    SettingsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    SettingsFrame.BorderSizePixel = 0
+    SettingsFrame.Position = UDim2.new(1, 5, 0, 126)
+    SettingsFrame.Size = UDim2.new(0, 0, 0, 0)
+    SettingsFrame.Visible = false
+    UICorner:Clone().Parent = SettingsFrame
+    
+    local FeaturesButton = Instance.new("ImageButton")
+    FeaturesButton.Name = "FeaturesButton"
+    FeaturesButton.Parent = MainFrame
+    FeaturesButton.BackgroundTransparency = 1
+    FeaturesButton.Position = UDim2.new(1, -26, 0.6, 0)
+    FeaturesButton.Size = UDim2.new(0, 21, 0, 21)
+    FeaturesButton.Image = "rbxassetid://10734943448"
+    
+    local FeaturesFrame = Instance.new("Frame")
+    FeaturesFrame.Name = "FeaturesFrame"
+    FeaturesFrame.Parent = MainFrame
+    FeaturesFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    FeaturesFrame.BorderSizePixel = 0
+    FeaturesFrame.Position = UDim2.new(1, 5, 0, 90)
+    FeaturesFrame.Size = UDim2.new(0, 0, 0, 0)
+    FeaturesFrame.Visible = false
+    UICorner:Clone().Parent = FeaturesFrame
+    
+    local FeaturesLabel = Instance.new("TextLabel")
+    FeaturesLabel.Name = "FeaturesLabel"
+    FeaturesLabel.Parent = FeaturesFrame
+    FeaturesLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    FeaturesLabel.BorderSizePixel = 0
+    FeaturesLabel.Position = UDim2.new(0.81, 0, 0.05, 0)
+    FeaturesLabel.Size = UDim2.new(0.01, 0, 0, 1)
+    FeaturesLabel.Font = Enum.Font.Gotham
+    FeaturesLabel.Text = "Main features"
+    FeaturesLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FeaturesLabel.TextSize = 12
+    FeaturesLabel.TextScaled = false
+    
+    local OtherFeaturesButton = Instance.new("ImageButton")
+    OtherFeaturesButton.Name = "OtherFeaturesButton"
+    OtherFeaturesButton.Parent = MainFrame
+    OtherFeaturesButton.BackgroundTransparency = 1
+    OtherFeaturesButton.Position = UDim2.new(1, -26, 0.4, 0)
+    OtherFeaturesButton.Size = UDim2.new(0, 21, 0, 21)
+    OtherFeaturesButton.Image = "rbxassetid://10709818399"
+    
+    local OtherFeaturesFrame = Instance.new("Frame")
+    OtherFeaturesFrame.Name = "OtherFeaturesFrame"
+    OtherFeaturesFrame.Parent = MainFrame
+    OtherFeaturesFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    OtherFeaturesFrame.BorderSizePixel = 0
+    OtherFeaturesFrame.Position = UDim2.new(1, 5, 0, 62)
+    OtherFeaturesFrame.Size = UDim2.new(0, 0, 0, 0)
+    OtherFeaturesFrame.Visible = false
+    UICorner:Clone().Parent = OtherFeaturesFrame
+    
+    local OtherFeaturesLabel = Instance.new("TextLabel")
+    OtherFeaturesLabel.Name = "OtherFeaturesLabel"
+    OtherFeaturesLabel.Parent = OtherFeaturesFrame
+    OtherFeaturesLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    OtherFeaturesLabel.BorderSizePixel = 0
+    OtherFeaturesLabel.Position = UDim2.new(0.45, 0, 0.08, 0)
+    OtherFeaturesLabel.Size = UDim2.new(0.01, 0, 0, 1)
+    OtherFeaturesLabel.Font = Enum.Font.Gotham
+    OtherFeaturesLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OtherFeaturesLabel.TextSize = 14
+    OtherFeaturesLabel.TextScaled = false
+    
+    CloseRangeTextBox.Name = "CloseRangeTextBox"
+    CloseRangeTextBox.Parent = SettingsFrame
+    CloseRangeTextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CloseRangeTextBox.BorderSizePixel = 0
+    CloseRangeTextBox.Position = UDim2.new(0.05, 0, 0.06, 0)
+    CloseRangeTextBox.Size = UDim2.new(0.9, 0, 0, 25)
+    CloseRangeTextBox.Font = Enum.Font.Gotham
+    CloseRangeTextBox.PlaceholderText = "Auto Block (Close range moves)"
+    CloseRangeTextBox.Text = ""
+    CloseRangeTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseRangeTextBox.TextScaled = true
+    UICorner:Clone().Parent = CloseRangeTextBox
+    
+    LongRangeTextBox.Name = "LongRangeTextBox"
+    LongRangeTextBox.Parent = SettingsFrame
+    LongRangeTextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    LongRangeTextBox.BorderSizePixel = 0
+    LongRangeTextBox.Position = UDim2.new(0.05, 0, 0.31, 0)
+    LongRangeTextBox.Size = UDim2.new(0.9, 0, 0, 25)
+    LongRangeTextBox.Font = Enum.Font.Gotham
+    LongRangeTextBox.PlaceholderText = "Auto Block (Long range moves)"
+    LongRangeTextBox.Text = ""
+    LongRangeTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LongRangeTextBox.TextScaled = true
+    UICorner:Clone().Parent = LongRangeTextBox
+    
+    CounterRangeTextBox.Name = "CounterRangeTextBox"
+    CounterRangeTextBox.Parent = SettingsFrame
+    CounterRangeTextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CounterRangeTextBox.BorderSizePixel = 0
+    CounterRangeTextBox.Position = UDim2.new(0.05, 0, 0.56, 0)
+    CounterRangeTextBox.Size = UDim2.new(0.9, 0, 0, 25)
+    CounterRangeTextBox.Font = Enum.Font.Gotham
+    CounterRangeTextBox.PlaceholderText = "Counter Notifier range"
+    CounterRangeTextBox.Text = ""
+    CounterRangeTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CounterRangeTextBox.TextScaled = true
+    UICorner:Clone().Parent = CounterRangeTextBox
+    
+    DefaultSettingsButton.Name = "DefaultSettingsButton"
+    DefaultSettingsButton.Parent = SettingsFrame
+    DefaultSettingsButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    DefaultSettingsButton.BorderSizePixel = 0
+    DefaultSettingsButton.Position = UDim2.new(0.237, 0, 0.81, 0)
+    DefaultSettingsButton.Size = UDim2.new(0.5, 0, 0, 25)
+    DefaultSettingsButton.Font = Enum.Font.Gotham
+    DefaultSettingsButton.Text = "Setup default settings"
+    DefaultSettingsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DefaultSettingsButton.TextSize = 14
+    DefaultSettingsButton.TextScaled = true
+    UICorner:Clone().Parent = DefaultSettingsButton
+    
+    local M1AfterBlockToggle = Instance.new("TextButton")
+    M1AfterBlockToggle.Name = "M1AfterBlockToggle"
+    M1AfterBlockToggle.Parent = FeaturesFrame
+    M1AfterBlockToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    M1AfterBlockToggle.BorderSizePixel = 0
+    M1AfterBlockToggle.Position = UDim2.new(0.12, 0, 0.45, 0)
+    M1AfterBlockToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    M1AfterBlockToggle.Text = ""
+    M1AfterBlockToggle.TextScaled = true
+    UICorner:Clone().Parent = M1AfterBlockToggle
+    
+    local M1AfterBlockLabel = Instance.new("TextLabel")
+    M1AfterBlockLabel.Name = "M1AfterBlockLabel"
+    M1AfterBlockLabel.Parent = FeaturesFrame
+    M1AfterBlockLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    M1AfterBlockLabel.BorderSizePixel = 0
+    M1AfterBlockLabel.Position = UDim2.new(0.155, 0, 0.38, 0)
+    M1AfterBlockLabel.Size = UDim2.new(0.01, 0, 0, 1)
+    M1AfterBlockLabel.Font = Enum.Font.Gotham
+    M1AfterBlockLabel.Text = "M1 after blocking"
+    M1AfterBlockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    M1AfterBlockLabel.TextSize = 9
+    
+    local CounterBaitToggle = Instance.new("TextButton")
+    CounterBaitToggle.Name = "CounterBaitToggle"
+    CounterBaitToggle.Parent = FeaturesFrame
+    CounterBaitToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    CounterBaitToggle.BorderSizePixel = 0
+    CounterBaitToggle.Position = UDim2.new(0.12, 0, 0.181, 0)
+    CounterBaitToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    CounterBaitToggle.Text = ""
+    CounterBaitToggle.TextScaled = true
+    UICorner:Clone().Parent = CounterBaitToggle
+    
+    local LEmoteToggle = Instance.new("TextButton")
+    LEmoteToggle.Name = "LEmoteToggle"
+    LEmoteToggle.Parent = FeaturesFrame
+    LEmoteToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    LEmoteToggle.BorderSizePixel = 0
+    LEmoteToggle.Position = UDim2.new(0.3, 0, 0.181, 0)
+    LEmoteToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    LEmoteToggle.Text = ""
+    LEmoteToggle.TextScaled = true
+    UICorner:Clone().Parent = LEmoteToggle
+    
+    local BaitMessageTextBox = Instance.new("TextBox")
+    BaitMessageTextBox.Name = "BaitMessageTextBox"
+    BaitMessageTextBox.Parent = FeaturesFrame
+    BaitMessageTextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    BaitMessageTextBox.BorderSizePixel = 0
+    BaitMessageTextBox.Position = UDim2.new(0.42, 0, 0.19, 0)
+    BaitMessageTextBox.Size = UDim2.new(0.25, 0, 0, 19)
+    BaitMessageTextBox.Font = Enum.Font.Gotham
+    BaitMessageTextBox.PlaceholderText = "Message after baiting"
+    BaitMessageTextBox.Text = "Simon says counter"
+    BaitMessageTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    BaitMessageTextBox.TextScaled = true
+    UICorner:Clone().Parent = BaitMessageTextBox
+    
+    local CounterBaitLabel = Instance.new("TextLabel")
+    CounterBaitLabel.Name = "CounterBaitLabel"
+    CounterBaitLabel.Parent = FeaturesFrame
+    CounterBaitLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    CounterBaitLabel.BorderSizePixel = 0
+    CounterBaitLabel.Position = UDim2.new(0.145, 0, 0.115, 0)
+    CounterBaitLabel.Size = UDim2.new(0.01, 0, 0, 1)
+    CounterBaitLabel.Font = Enum.Font.Gotham
+    CounterBaitLabel.Text = "Counter bait"
+    CounterBaitLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CounterBaitLabel.TextSize = 10
+    CounterBaitLabel.TextScaled = false
+    
+    local LEmoteLabel = Instance.new("TextLabel")
+    LEmoteLabel.Name = "LEmoteLabel"
+    LEmoteLabel.Parent = FeaturesFrame
+    LEmoteLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    LEmoteLabel.BorderSizePixel = 0
+    LEmoteLabel.Position = UDim2.new(0.348, 0, 0.115, 0)
+    LEmoteLabel.Size = UDim2.new(0.01, 0, 0, 1)
+    LEmoteLabel.Font = Enum.Font.Gotham
+    LEmoteLabel.Text = "L emote"
+    LEmoteLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LEmoteLabel.TextSize = 10
+    LEmoteLabel.TextScaled = false
+    
+    local DeathCounterNotifierToggle = Instance.new("TextButton")
+    DeathCounterNotifierToggle.Name = "DeathCounterNotifierToggle"
+    DeathCounterNotifierToggle.Parent = FeaturesFrame
+    DeathCounterNotifierToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+    DeathCounterNotifierToggle.BorderSizePixel = 0
+    DeathCounterNotifierToggle.Position = UDim2.new(0.12, 0, 0.745, 0)
+    DeathCounterNotifierToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    DeathCounterNotifierToggle.Text = ""
+    DeathCounterNotifierToggle.TextScaled = true
+    UICorner:Clone().Parent = DeathCounterNotifierToggle
+    
+    local DeathCounterNotifierLabel = Instance.new("TextLabel")
+    DeathCounterNotifierLabel.Name = "DeathCounterNotifierLabel"
+    DeathCounterNotifierLabel.Parent = FeaturesFrame
+    DeathCounterNotifierLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    DeathCounterNotifierLabel.BorderSizePixel = 0
+    DeathCounterNotifierLabel.Position = UDim2.new(0.14, 0, 0.66, 0)
+    DeathCounterNotifierLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    DeathCounterNotifierLabel.Font = Enum.Font.Gotham
+    DeathCounterNotifierLabel.Text = "Death counter notifer"
+    DeathCounterNotifierLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DeathCounterNotifierLabel.TextSize = 9
+    DeathCounterNotifierLabel.TextScaled = false
+    
+    local AutoCounterM1Label = Instance.new("TextLabel")
+    AutoCounterM1Label.Name = "AutoCounterM1Label"
+    AutoCounterM1Label.Parent = FeaturesFrame
+    AutoCounterM1Label.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    AutoCounterM1Label.BorderSizePixel = 0
+    AutoCounterM1Label.Position = UDim2.new(0.4, 0, 0.388, 0)
+    AutoCounterM1Label.Size = UDim2.new(0.07, 0, 0, 1)
+    AutoCounterM1Label.Font = Enum.Font.Gotham
+    AutoCounterM1Label.Text = "Auto Counter M1"
+    AutoCounterM1Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AutoCounterM1Label.TextSize = 9
+    AutoCounterM1Label.TextScaled = false
+    
+    local AutoCounterM1Toggle = Instance.new("TextButton")
+    AutoCounterM1Toggle.Name = "AutoCounterM1Toggle"
+    AutoCounterM1Toggle.Parent = FeaturesFrame
+    AutoCounterM1Toggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    AutoCounterM1Toggle.BorderSizePixel = 0
+    AutoCounterM1Toggle.Position = UDim2.new(0.4, 0, 0.45, 0)
+    AutoCounterM1Toggle.Size = UDim2.new(0.075, 0, 0, 23)
+    AutoCounterM1Toggle.Text = ""
+    AutoCounterM1Toggle.TextScaled = true
+    UICorner:Clone().Parent = AutoCounterM1Toggle
+    
+    local M1ReachToggle = Instance.new("TextButton")
+    M1ReachToggle.Parent = FeaturesFrame
+    M1ReachToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    M1ReachToggle.BorderSizePixel = 0
+    M1ReachToggle.Position = UDim2.new(0.64, 0, 0.45, 0)
+    M1ReachToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    M1ReachToggle.Text = ""
+    UICorner:Clone().Parent = M1ReachToggle
+    
+    local M1ReachLabel = Instance.new("TextLabel")
+    M1ReachLabel.Parent = FeaturesFrame
+    M1ReachLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    M1ReachLabel.BorderSizePixel = 0
+    M1ReachLabel.Position = UDim2.new(0.64, 0, 0.388, 0)
+    M1ReachLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    M1ReachLabel.Font = Enum.Font.Gotham
+    M1ReachLabel.Text = "M1 Reach"
+    M1ReachLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    M1ReachLabel.TextSize = 9
+    
+    local M1ResetToggle = Instance.new("TextButton")
+    M1ResetToggle.Parent = FeaturesFrame
+    M1ResetToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    M1ResetToggle.BorderSizePixel = 0
+    M1ResetToggle.Position = UDim2.new(0.43, 0, 0.745, 0)
+    M1ResetToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    M1ResetToggle.Text = ""
+    UICorner:Clone().Parent = M1ResetToggle
+    
+    local M1ResetLabel = Instance.new("TextLabel")
+    M1ResetLabel.Parent = FeaturesFrame
+    M1ResetLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    M1ResetLabel.BorderSizePixel = 0
+    M1ResetLabel.Position = UDim2.new(0.44, 0, 0.67, 0)
+    M1ResetLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    M1ResetLabel.Font = Enum.Font.Gotham
+    M1ResetLabel.Text = "M1 reset [Endlag]"
+    M1ResetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    M1ResetLabel.TextSize = 9
+    M1ResetLabel.TextScaled = false
+    
+    local AntiDeathCounterToggle = Instance.new("TextButton")
+    AntiDeathCounterToggle.Parent = FeaturesFrame
+    AntiDeathCounterToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    AntiDeathCounterToggle.BorderSizePixel = 0
+    AntiDeathCounterToggle.Position = UDim2.new(0.732, 0, 0.745, 0)
+    AntiDeathCounterToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    AntiDeathCounterToggle.Text = ""
+    UICorner:Clone().Parent = AntiDeathCounterToggle
+    
+    local AntiDeathCounterLabel = Instance.new("TextLabel")
+    AntiDeathCounterLabel.Parent = FeaturesFrame
+    AntiDeathCounterLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    AntiDeathCounterLabel.BorderSizePixel = 0
+    AntiDeathCounterLabel.Position = UDim2.new(0.75, 0, 0.67, 0)
+    AntiDeathCounterLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    AntiDeathCounterLabel.Font = Enum.Font.Gotham
+    AntiDeathCounterLabel.Text = "Anti death counter"
+    AntiDeathCounterLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AntiDeathCounterLabel.TextSize = 9
+    AntiDeathCounterLabel.TextScaled = false
+    
+    local SeparatorLine = Instance.new("Frame")
+    SeparatorLine.Parent = OtherFeaturesFrame
+    SeparatorLine.Size = UDim2.new(0, 1, 0.7, 0)
+    SeparatorLine.Position = UDim2.new(0.8, 0, 0.16, 0)
+    SeparatorLine.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
+    SeparatorLine.BorderSizePixel = 0
+    SeparatorLine.BackgroundTransparency = 0.6
+    UICorner:Clone().Parent = SeparatorLine
+    
+    local TeleportButton = Instance.new("ImageButton")
+    TeleportButton.Parent = OtherFeaturesFrame
+    TeleportButton.BackgroundTransparency = 1
+    TeleportButton.Position = UDim2.new(1, -43.1, 0.25, 0)
+    TeleportButton.Size = UDim2.new(0, 27, 0, 27)
+    TeleportButton.Image = "rbxassetid://10734886004"
+    
+    local MiscButton = Instance.new("ImageButton")
+    MiscButton.Parent = OtherFeaturesFrame
+    MiscButton.BackgroundTransparency = 1
+    MiscButton.Position = UDim2.new(1, -43.1, 0.55, 0)
+    MiscButton.Size = UDim2.new(0, 28, 0, 28)
+    MiscButton.Image = "rbxassetid://10734950020"
+    
+    local MountainTPButton = Instance.new("TextButton")
+    local MountainTPCorner = Instance.new("UICorner")
+    MountainTPButton.Parent = OtherFeaturesFrame
+    MountainTPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    MountainTPButton.BorderSizePixel = 0
+    MountainTPButton.Position = UDim2.new(0.01, 0, 0.25, 0)
+    MountainTPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    MountainTPButton.Text = "Mountain"
+    MountainTPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    MountainTPButton.TextScaled = true
+    MountainTPCorner.Parent = MountainTPButton
+    MountainTPCorner.CornerRadius = UDim.new(0, 6)
+    MountainTPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-59, 653, -381)
+    end)
+    
+    local DeathCounterTPButton = Instance.new("TextButton")
+    local DeathCounterTPCorner = Instance.new("UICorner")
+    DeathCounterTPButton.Parent = OtherFeaturesFrame
+    DeathCounterTPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    DeathCounterTPButton.BorderSizePixel = 0
+    DeathCounterTPButton.Position = UDim2.new(0.31, 0, 0.25, 0)
+    DeathCounterTPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    DeathCounterTPButton.Text = "Death Counter"
+    DeathCounterTPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    DeathCounterTPButton.TextScaled = true
+    DeathCounterTPCorner.Parent = DeathCounterTPButton
+    DeathCounterTPCorner.CornerRadius = UDim.new(0, 6)
+    DeathCounterTPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-66, 29, 20348)
+    end)
+    
+    local AtomicTPButton = Instance.new("TextButton")
+    local AtomicTPCorner = Instance.new("UICorner")
+    AtomicTPButton.Parent = OtherFeaturesFrame
+    AtomicTPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    AtomicTPButton.BorderSizePixel = 0
+    AtomicTPButton.Position = UDim2.new(0.59, 0, 0.25, 0)
+    AtomicTPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    AtomicTPButton.Text = "Atomic"
+    AtomicTPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    AtomicTPButton.TextScaled = true
+    AtomicTPCorner.Parent = AtomicTPButton
+    AtomicTPCorner.CornerRadius = UDim.new(0, 6)
+    AtomicTPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1070, 133, 23006)
+    end)
+    
+    local BaseplateTPButton = Instance.new("TextButton")
+    local BaseplateTPCorner = Instance.new("UICorner")
+    BaseplateTPButton.Parent = OtherFeaturesFrame
+    BaseplateTPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    BaseplateTPButton.BorderSizePixel = 0
+    BaseplateTPButton.Position = UDim2.new(0.01, 0, 0.52, 0)
+    BaseplateTPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    BaseplateTPButton.Text = "Baseplate"
+    BaseplateTPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    BaseplateTPButton.TextScaled = true
+    BaseplateTPCorner.Parent = BaseplateTPButton
+    BaseplateTPCorner.CornerRadius = UDim.new(0, 6)
+    BaseplateTPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(992, 20, 22952)
+    end)
+    
+    local Baseplate2TPButton = Instance.new("TextButton")
+    local Baseplate2TPCorner = Instance.new("UICorner")
+    Baseplate2TPButton.Parent = OtherFeaturesFrame
+    Baseplate2TPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    Baseplate2TPButton.BorderSizePixel = 0
+    Baseplate2TPButton.Position = UDim2.new(0.31, 0, 0.52, 0)
+    Baseplate2TPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    Baseplate2TPButton.Text = "Baseplate 2"
+    Baseplate2TPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    Baseplate2TPButton.TextScaled = true
+    Baseplate2TPCorner.Parent = Baseplate2TPButton
+    Baseplate2TPCorner.CornerRadius = UDim.new(0, 6)
+    Baseplate2TPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1065, 406, 22992)
+    end)
+    
+    local MiddleMapTPButton = Instance.new("TextButton")
+    local MiddleMapTPCorner = Instance.new("UICorner")
+    MiddleMapTPButton.Parent = OtherFeaturesFrame
+    MiddleMapTPButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    MiddleMapTPButton.BorderSizePixel = 0
+    MiddleMapTPButton.Position = UDim2.new(0.59, 0, 0.52, 0)
+    MiddleMapTPButton.Size = UDim2.new(0.2, 0, 0, 23)
+    MiddleMapTPButton.Text = "Middle Map"
+    MiddleMapTPButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    MiddleMapTPButton.TextScaled = true
+    MiddleMapTPCorner.Parent = MiddleMapTPButton
+    MiddleMapTPCorner.CornerRadius = UDim.new(0, 6)
+    MiddleMapTPButton.MouseButton1Click:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(149, 441, 26)
+    end)
+    
+    local NoStunLabel = Instance.new("TextLabel")
+    NoStunLabel.Name = "NoStunLabel"
+    NoStunLabel.Parent = OtherFeaturesFrame
+    NoStunLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    NoStunLabel.BorderSizePixel = 0
+    NoStunLabel.Position = UDim2.new(0.06, 0, 0.16, 0)
+    NoStunLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    NoStunLabel.Font = Enum.Font.Gotham
+    NoStunLabel.Text = "No Stun"
+    NoStunLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NoStunLabel.TextSize = 10
+    
+    local NoStunToggle = Instance.new("TextButton")
+    NoStunToggle.Name = "NoStunToggle"
+    NoStunToggle.Parent = OtherFeaturesFrame
+    NoStunToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    NoStunToggle.BorderSizePixel = 0
+    NoStunToggle.Position = UDim2.new(0.05, 0, 0.25, 0)
+    NoStunToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    NoStunToggle.Text = ""
+    UICorner:Clone().Parent = NoStunToggle
+    
+    local NoFatigueToggle = Instance.new("TextButton")
+    NoFatigueToggle.Name = "NoFatigueToggle"
+    NoFatigueToggle.Parent = OtherFeaturesFrame
+    NoFatigueToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    NoFatigueToggle.BorderSizePixel = 0
+    NoFatigueToggle.Position = UDim2.new(0.25, 0, 0.25, 0)
+    NoFatigueToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    NoFatigueToggle.Text = ""
+    UICorner:Clone().Parent = NoFatigueToggle
+    
+    local NoFatigueLabel = Instance.new("TextLabel")
+    NoFatigueLabel.Parent = OtherFeaturesFrame
+    NoFatigueLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    NoFatigueLabel.BorderSizePixel = 0
+    NoFatigueLabel.Position = UDim2.new(0.25, 0, 0.16, 0)
+    NoFatigueLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    NoFatigueLabel.Font = Enum.Font.Gotham
+    NoFatigueLabel.Text = "No Fatigue"
+    NoFatigueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NoFatigueLabel.TextSize = 10
+    
+    local AntiKnockbackToggle = Instance.new("TextButton")
+    AntiKnockbackToggle.Name = "AntiKnockbackToggle"
+    AntiKnockbackToggle.Parent = OtherFeaturesFrame
+    AntiKnockbackToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    AntiKnockbackToggle.BorderSizePixel = 0
+    AntiKnockbackToggle.Position = UDim2.new(0.6, 0, 0.56, 0)
+    AntiKnockbackToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    AntiKnockbackToggle.Text = ""
+    UICorner:Clone().Parent = AntiKnockbackToggle
+    
+    local AntiKnockbackLabel = Instance.new("TextLabel")
+    AntiKnockbackLabel.Parent = OtherFeaturesFrame
+    AntiKnockbackLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    AntiKnockbackLabel.BorderSizePixel = 0
+    AntiKnockbackLabel.Position = UDim2.new(0.6, 0, 0.475, 0)
+    AntiKnockbackLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    AntiKnockbackLabel.Font = Enum.Font.Gotham
+    AntiKnockbackLabel.Text = "Anti Knockback"
+    AntiKnockbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    AntiKnockbackLabel.TextSize = 10
+    
+    local ShowCDToggle = Instance.new("TextButton")
+    ShowCDToggle.Name = "ShowCDToggle"
+    ShowCDToggle.Parent = OtherFeaturesFrame
+    ShowCDToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    ShowCDToggle.BorderSizePixel = 0
+    ShowCDToggle.Position = UDim2.new(0.45, 0, 0.25, 0)
+    ShowCDToggle.Size = UDim2.new(0.075, 0, 0, 23)
+    ShowCDToggle.Text = ""
+    UICorner:Clone().Parent = ShowCDToggle
+    
+    local ShowCDLabel = Instance.new("TextLabel")
+    ShowCDLabel.Parent = OtherFeaturesFrame
+    ShowCDLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    ShowCDLabel.BorderSizePixel = 0
+    ShowCDLabel.Position = UDim2.new(0.46, 0, 0.165, 0)
+    ShowCDLabel.Size = UDim2.new(0.07, 0, 0, 1)
+    ShowCDLabel.Font = Enum.Font.Gotham
+    ShowCDLabel.Text = "Show CD info"
+    ShowCDLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ShowCDLabel.TextSize = 10
+    
+    local VoidScriptButton = Instance.new("TextButton")
+    local VoidScriptCorner = Instance.new("UICorner")
+    VoidScriptButton.Parent = OtherFeaturesFrame
+    VoidScriptButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    VoidScriptButton.BorderSizePixel = 0
+    VoidScriptButton.Position = UDim2.new(0.28, 0, 0.47, 0)
+    VoidScriptButton.Size = UDim2.new(0.2, 0, 0, 24)
+    VoidScriptButton.Text = "Void Script"
+    VoidScriptButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    VoidScriptButton.TextScaled = true
+    VoidScriptCorner.Parent = VoidScriptButton
+    VoidScriptCorner.CornerRadius = UDim.new(0, 6)
+    VoidScriptButton.MouseButton1Click:Connect(function()
+        loadstring(game:HttpGet("https://pastefy.app/zV3ruT7F/raw"))()
+    end)
+    
+    local AntiLagButton = Instance.new("TextButton")
+    local AntiLagCorner = Instance.new("UICorner")
+    AntiLagButton.Parent = OtherFeaturesFrame
+    AntiLagButton.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+    AntiLagButton.BorderSizePixel = 0
+    AntiLagButton.Position = UDim2.new(0.03, 0, 0.47, 0)
+    AntiLagButton.Size = UDim2.new(0.2, 0, 0, 23)
+    AntiLagButton.Text = "Anti Lag"
+    AntiLagButton.TextColor3 = Color3.fromRGB(240, 240, 240)
+    AntiLagButton.TextSize = 10
+    AntiLagCorner.Parent = AntiLagButton
+    AntiLagCorner.CornerRadius = UDim.new(0, 6)
+    AntiLagButton.MouseButton1Click:Connect(function()
+        local Map = workspace:FindFirstChild("Map")
+        if Map then
+            for _, ObjectName in ipairs({"Grass", "Trees", "GrassTop", "GrassBottom", "Benchs"}) do
+                local Object = Map:FindFirstChild(ObjectName)
+                if Object then
+                    Object:Destroy()
+                end
+            end
+        end
+        
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        for _, FolderName in ipairs({"Cutscenes", "CameraShaker", "Emotes", "Resources"}) do
+            local Folder = ReplicatedStorage:FindFirstChild(FolderName)
+            if Folder then
+                for _, Child in ipairs(Folder:GetChildren()) do
+                    Child:Destroy()
+                end
+            end
+        end
+        
+        local Library = ReplicatedStorage:FindFirstChild("library")
+        if Library then
+            local CameraShaker = Library:FindFirstChild("CameraShaker")
+            if CameraShaker then
+                CameraShaker:Destroy()
+            end
+        end
+        
+        local Player = game.Players.LocalPlayer
+        local LiveFolder = workspace:FindFirstChild("Live")
+        if LiveFolder then
+            local PlayerCharacter = LiveFolder:FindFirstChild(Player.Name)
+            if PlayerCharacter then
+                task.spawn(function()
+                    while true do
+                        for _, ArmName in ipairs({"Left Arm", "Right Arm"}) do
+                            local Arm = PlayerCharacter:FindFirstChild(ArmName)
+                            if Arm then
+                                Arm.Transparency = 0
+                            end
+                        end
+                        task.wait(0.8)
+                    end
+                end)
+            end
+        end
+        
+        local Lighting = game:GetService("Lighting")
+        for _, ObjectName in ipairs({"Atmosphere", "Clear Blue Sky"}) do
+            local Object = Lighting:FindFirstChild(ObjectName)
+            if Object then
+                Object:Destroy()
+            end
+        end
+        
+        local Clouds = workspace.Terrain:FindFirstChild("Clouds")
+        if Clouds then
+            Clouds:Destroy()
+        end
+    end)
+    
+    local CurrentCategory = nil
+    SeparatorLine.Visible = true
+    MountainTPButton.Visible = false
+    DeathCounterTPButton.Visible = false
+    AtomicTPButton.Visible = false
+    BaseplateTPButton.Visible = false
+    Baseplate2TPButton.Visible = false
+    MiddleMapTPButton.Visible = false
+    NoStunToggle.Visible = false
+    NoFatigueToggle.Visible = false
+    OtherFeaturesLabel.Visible = true
+    NoFatigueLabel.Visible = false
+    VoidScriptButton.Visible = false
+    AntiLagButton.Visible = false
+    ShowCDLabel.Visible = false
+    ShowCDToggle.Visible = false
+    AntiKnockbackLabel.Visible = false
+    AntiKnockbackToggle.Visible = false
+    NoStunLabel.Visible = false
+    OtherFeaturesLabel.Text = "Other features"
+    
+    TeleportButton.MouseButton1Click:Connect(function()
+        CurrentCategory = 1
+        MountainTPButton.Visible = true
+        DeathCounterTPButton.Visible = true
+        AtomicTPButton.Visible = true
+        BaseplateTPButton.Visible = true
+        Baseplate2TPButton.Visible = true
+        MiddleMapTPButton.Visible = true
+        NoFatigueToggle.Visible = false
+        NoStunToggle.Visible = false
+        NoFatigueLabel.Visible = false
+        AntiLagButton.Visible = false
+        ShowCDLabel.Visible = false
+        ShowCDToggle.Visible = false
+        VoidScriptButton.Visible = false
+        AntiKnockbackLabel.Visible = false
+        AntiKnockbackToggle.Visible = false
+        NoStunLabel.Visible = false
+        OtherFeaturesLabel.Text = "Teleport"
+    end)
+    
+    MiscButton.MouseButton1Click:Connect(function()
+        CurrentCategory = 2
+        MountainTPButton.Visible = false
+        DeathCounterTPButton.Visible = false
+        BaseplateTPButton.Visible = false
+        AtomicTPButton.Visible = false
+        Baseplate2TPButton.Visible = false
+        MiddleMapTPButton.Visible = false
+        NoStunToggle.Visible = true
+        NoFatigueToggle.Visible = true
+        NoFatigueLabel.Visible = true
+        NoStunLabel.Visible = true
+        ShowCDLabel.Visible = true
+        ShowCDToggle.Visible = true
+        VoidScriptButton.Visible = true
+        AntiKnockbackLabel.Visible = true
+        AntiKnockbackToggle.Visible = true
+        AntiLagButton.Visible = true
+        OtherFeaturesLabel.Text = "Misc"
+    end)
+    
+    local MainFrameExpanded = true
+    ToggleButton.MouseButton1Click:Connect(function()
+        MainFrameExpanded = not MainFrameExpanded
+        if MainFrameExpanded then
+            MainFrame:TweenSize(UDim2.new(0, 250, 0, 140), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3, true)
+            wait(0.29)
+            AutoBlockButton.Visible = true
+            CounterNotifierButton.Visible = true
+            SettingsButton.Visible = true
+            FeaturesButton.Visible = true
+            OtherFeaturesButton.Visible = true
+            AutoBlockLabel.Visible = true
+            CounterNotifierLabel.Visible = true
+        else
+            MainFrame:TweenSize(UDim2.new(0, 250, 0, 35), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3, true)
+            wait(0.05)
+            AutoBlockButton.Visible = false
+            CounterNotifierButton.Visible = false
+            SettingsButton.Visible = false
+            FeaturesButton.Visible = false
+            OtherFeaturesButton.Visible = false
+            AutoBlockLabel.Visible = false
+            CounterNotifierLabel.Visible = false
+            if SettingsFrame.Visible then
+                DefaultSettingsButton.Visible = false
+                CloseRangeTextBox.Visible = false
+                LongRangeTextBox.Visible = false
+                CounterRangeTextBox.Visible = false
+                SettingsFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    SettingsFrame.Visible = false
+                end)
+            end
+            if FeaturesFrame.Visible then
+                M1AfterBlockLabel.Visible = false
+                CounterBaitLabel.Visible = false
+                AutoCounterM1Label.Visible = false
+                FeaturesLabel.Visible = false
+                DeathCounterNotifierLabel.Visible = false
+                LEmoteLabel.Visible = false
+                LEmoteToggle.Visible = false
+                M1AfterBlockToggle.Visible = false
+                CounterBaitToggle.Visible = false
+                M1ReachLabel.Visible = false
+                M1ReachToggle.Visible = false
+                M1ResetLabel.Visible = false
+                M1ResetToggle.Visible = false
+                AntiDeathCounterLabel.Visible = false
+                AntiDeathCounterToggle.Visible = false
+                DeathCounterNotifierToggle.Visible = false
+                AutoCounterM1Toggle.Visible = false
+                BaitMessageTextBox.Visible = false
+                FeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    FeaturesFrame.Visible = false
+                end)
+            end
+            if OtherFeaturesFrame.Visible then
+                OtherFeaturesLabel.Visible = false
+                SeparatorLine.Visible = false
+                TeleportButton.Visible = false
+                MiscButton.Visible = false
+                MountainTPButton.Visible = false
+                DeathCounterTPButton.Visible = false
+                AtomicTPButton.Visible = false
+                BaseplateTPButton.Visible = false
+                Baseplate2TPButton.Visible = false
+                MiddleMapTPButton.Visible = false
+                NoFatigueLabel.Visible = false
+                NoStunLabel.Visible = false
+                NoFatigueToggle.Visible = false
+                NoStunToggle.Visible = false
+                VoidScriptButton.Visible = false
+                ShowCDLabel.Visible = false
+                AntiKnockbackLabel.Visible = false
+                AntiKnockbackToggle.Visible = false
+                ShowCDToggle.Visible = false
+                AntiLagButton.Visible = false
+                OtherFeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    OtherFeaturesFrame.Visible = false
+                end)
+            end
+        end
+        ToggleButton.Text = MainFrameExpanded and "-" or "+"
+    end)
+    
+    SettingsButton.MouseButton1Click:Connect(function()
+        if SettingsFrame.Visible then
+            DefaultSettingsButton.Visible = false
+            CloseRangeTextBox.Visible = false
+            LongRangeTextBox.Visible = false
+            CounterRangeTextBox.Visible = false
+            SettingsFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                SettingsFrame.Visible = false
+            end)
+        else
+            if FeaturesFrame.Visible then
+                M1AfterBlockLabel.Visible = false
+                CounterBaitLabel.Visible = false
+                DeathCounterNotifierLabel.Visible = false
+                AutoCounterM1Label.Visible = false
+                M1AfterBlockToggle.Visible = false
+                CounterBaitToggle.Visible = false
+                DeathCounterNotifierToggle.Visible = false
+                AutoCounterM1Toggle.Visible = false
+                M1ReachLabel.Visible = false
+                M1ReachToggle.Visible = false
+                AntiDeathCounterLabel.Visible = false
+                AntiDeathCounterToggle.Visible = false
+                M1ResetLabel.Visible = false
+                M1ResetToggle.Visible = false
+                LEmoteLabel.Visible = false
+                LEmoteToggle.Visible = false
+                BaitMessageTextBox.Visible = false
+                FeaturesLabel.Visible = false
+                FeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    FeaturesFrame.Visible = false
+                end)
+            end
+            if OtherFeaturesFrame.Visible then
+                OtherFeaturesLabel.Visible = false
+                SeparatorLine.Visible = false
+                TeleportButton.Visible = false
+                MiscButton.Visible = false
+                MountainTPButton.Visible = false
+                DeathCounterTPButton.Visible = false
+                AtomicTPButton.Visible = false
+                BaseplateTPButton.Visible = false
+                Baseplate2TPButton.Visible = false
+                MiddleMapTPButton.Visible = false
+                NoStunToggle.Visible = false
+                NoFatigueToggle.Visible = false
+                NoFatigueLabel.Visible = false
+                NoStunLabel.Visible = false
+                VoidScriptButton.Visible = false
+                AntiKnockbackLabel.Visible = false
+                AntiKnockbackToggle.Visible = false
+                ShowCDLabel.Visible = false
+                ShowCDToggle.Visible = false
+                AntiLagButton.Visible = false
+                OtherFeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    OtherFeaturesFrame.Visible = false
+                end)
+            end
+            SettingsFrame.Visible = true
+            SettingsFrame:TweenSize(UDim2.new(0, 270, 0, 145), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                DefaultSettingsButton.Visible = true
+                CloseRangeTextBox.Visible = true
+                LongRangeTextBox.Visible = true
+                CounterRangeTextBox.Visible = true
+            end)
+        end
+    end)
+    
+    FeaturesButton.MouseButton1Click:Connect(function()
+        if FeaturesFrame.Visible then
+            M1AfterBlockLabel.Visible = false
+            CounterBaitLabel.Visible = false
+            DeathCounterNotifierLabel.Visible = false
+            AutoCounterM1Label.Visible = false
+            M1AfterBlockToggle.Visible = false
+            CounterBaitToggle.Visible = false
+            DeathCounterNotifierToggle.Visible = false
+            AutoCounterM1Toggle.Visible = false
+            M1ReachLabel.Visible = false
+            M1ReachToggle.Visible = false
+            AntiDeathCounterLabel.Visible = false
+            AntiDeathCounterToggle.Visible = false
+            M1ResetLabel.Visible = false
+            M1ResetToggle.Visible = false
+            LEmoteLabel.Visible = false
+            LEmoteToggle.Visible = false
+            BaitMessageTextBox.Visible = false
+            FeaturesLabel.Visible = false
+            FeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                FeaturesFrame.Visible = false
+            end)
+        else
+            if SettingsFrame.Visible then
+                DefaultSettingsButton.Visible = false
+                CloseRangeTextBox.Visible = false
+                LongRangeTextBox.Visible = false
+                CounterRangeTextBox.Visible = false
+                SettingsFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    SettingsFrame.Visible = false
+                end)
+            end
+            if OtherFeaturesFrame.Visible then
+                OtherFeaturesLabel.Visible = false
+                SeparatorLine.Visible = false
+                TeleportButton.Visible = false
+                MiscButton.Visible = false
+                MountainTPButton.Visible = false
+                DeathCounterTPButton.Visible = false
+                AtomicTPButton.Visible = false
+                BaseplateTPButton.Visible = false
+                Baseplate2TPButton.Visible = false
+                MiddleMapTPButton.Visible = false
+                NoStunLabel.Visible = false
+                NoStunToggle.Visible = false
+                NoFatigueLabel.Visible = false
+                NoFatigueToggle.Visible = false
+                VoidScriptButton.Visible = false
+                AntiKnockbackLabel.Visible = false
+                AntiKnockbackToggle.Visible = false
+                ShowCDLabel.Visible = false
+                ShowCDToggle.Visible = false
+                AntiLagButton.Visible = false
+                OtherFeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    OtherFeaturesFrame.Visible = false
+                end)
+            end
+            FeaturesFrame.Visible = true
+            FeaturesFrame:TweenSize(UDim2.new(0, 300, 0, 140), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+            end)
+            task.wait(0.29)
+            M1AfterBlockToggle.Visible = true
+            CounterBaitToggle.Visible = true
+            DeathCounterNotifierToggle.Visible = true
+            AutoCounterM1Toggle.Visible = true
+            M1ReachLabel.Visible = true
+            M1ReachToggle.Visible = true
+            LEmoteLabel.Visible = true
+            LEmoteToggle.Visible = true
+            BaitMessageTextBox.Visible = true
+            AntiDeathCounterLabel.Visible = true
+            AntiDeathCounterToggle.Visible = true
+            M1ResetLabel.Visible = true
+            M1ResetToggle.Visible = true
+            FeaturesLabel.Visible = true
+            M1AfterBlockLabel.Visible = true
+            CounterBaitLabel.Visible = true
+            DeathCounterNotifierLabel.Visible = true
+            AutoCounterM1Label.Visible = true
+        end
+    end)
+    
+    OtherFeaturesButton.MouseButton1Click:Connect(function()
+        if OtherFeaturesFrame.Visible then
+            OtherFeaturesLabel.Visible = false
+            SeparatorLine.Visible = false
+            TeleportButton.Visible = false
+            MiscButton.Visible = false
+            MountainTPButton.Visible = false
+            DeathCounterTPButton.Visible = false
+            AtomicTPButton.Visible = false
+            BaseplateTPButton.Visible = false
+            Baseplate2TPButton.Visible = false
+            MiddleMapTPButton.Visible = false
+            NoFatigueToggle.Visible = false
+            NoStunToggle.Visible = false
+            NoFatigueLabel.Visible = false
+            NoStunLabel.Visible = false
+            VoidScriptButton.Visible = false
+            AntiKnockbackLabel.Visible = false
+            AntiKnockbackToggle.Visible = false
+            ShowCDLabel.Visible = false
+            ShowCDToggle.Visible = false
+            AntiLagButton.Visible = false
+            OtherFeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                OtherFeaturesFrame.Visible = false
+            end)
+        else
+            if SettingsFrame.Visible then
+                DefaultSettingsButton.Visible = false
+                CloseRangeTextBox.Visible = false
+                LongRangeTextBox.Visible = false
+                CounterRangeTextBox.Visible = false
+                SettingsFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    SettingsFrame.Visible = false
+                end)
+            end
+            if FeaturesFrame.Visible then
+                M1AfterBlockLabel.Visible = false
+                CounterBaitLabel.Visible = false
+                DeathCounterNotifierLabel.Visible = false
+                AutoCounterM1Label.Visible = false
+                M1ReachLabel.Visible = false
+                M1AfterBlockToggle.Visible = false
+                CounterBaitToggle.Visible = false
+                DeathCounterNotifierToggle.Visible = false
+                AutoCounterM1Toggle.Visible = false
+                M1ReachToggle.Visible = false
+                AntiDeathCounterLabel.Visible = false
+                AntiDeathCounterToggle.Visible = false
+                M1ResetLabel.Visible = false
+                M1ResetToggle.Visible = false
+                LEmoteLabel.Visible = false
+                LEmoteToggle.Visible = false
+                BaitMessageTextBox.Visible = false
+                FeaturesLabel.Visible = false
+                FeaturesFrame:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+                    FeaturesFrame.Visible = false
+                end)
+            end
+            OtherFeaturesFrame.Visible = true
+            OtherFeaturesFrame:TweenSize(UDim2.new(0, 300, 0, 140), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true, function()
+            end)
+            task.wait(0.29)
+            OtherFeaturesLabel.Visible = true
+            SeparatorLine.Visible = true
+            TeleportButton.Visible = true
+            MiscButton.Visible = true
+            if CurrentCategory == 1 then
+                MountainTPButton.Visible = true
+                DeathCounterTPButton.Visible = true
+                AtomicTPButton.Visible = true
+                BaseplateTPButton.Visible = true
+                Baseplate2TPButton.Visible = true
+                MiddleMapTPButton.Visible = true
+            end
+            if CurrentCategory == 2 then
+                NoFatigueToggle.Visible = true
+                NoStunToggle.Visible = true
+                NoFatigueLabel.Visible = true
+                NoStunLabel.Visible = true
+                VoidScriptButton.Visible = true
+                AntiLagButton.Visible = true
+                ShowCDLabel.Visible = true
+                AntiKnockbackLabel.Visible = true
+                AntiKnockbackToggle.Visible = true
+                ShowCDToggle.Visible = true
+            end
+        end
+    end)
+    
+    local AutoBlockEnabled = false
+    local CounterNotifierEnabled = false
+    
+    AutoBlockButton.MouseButton1Click:Connect(function()
+        AutoBlockEnabled = not AutoBlockEnabled
+        AutoBlockButton.Text = AutoBlockEnabled and "Auto Block Enabled" or "Auto Block Disabled"
+    end)
+    
+    CounterNotifierButton.MouseButton1Click:Connect(function()
+        CounterNotifierEnabled = not CounterNotifierEnabled
+        CounterNotifierButton.Text = CounterNotifierEnabled and "Counter Notifier Enabled" or "Counter Notifier Disabled"
+    end)
+    
+    DefaultSettingsButton.MouseButton1Click:Connect(function()
+        CloseRangeTextBox.Text = "14"
+        LongRangeTextBox.Text = "35"
+        CounterRangeTextBox.Text = "20"
+    end)
+    
+    local M1AfterBlockEnabled = false
+    M1AfterBlockToggle.MouseButton1Click:Connect(function()
+        M1AfterBlockEnabled = not M1AfterBlockEnabled
+        if M1AfterBlockEnabled then
+            M1AfterBlockToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            M1AfterBlockToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local DeathCounterNotifierEnabled = true
+    DeathCounterNotifierToggle.MouseButton1Click:Connect(function()
+        DeathCounterNotifierEnabled = not DeathCounterNotifierEnabled
+        if DeathCounterNotifierEnabled then
+            DeathCounterNotifierToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            DeathCounterNotifierToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local CounterBaitEnabled = false
+    CounterBaitToggle.MouseButton1Click:Connect(function()
+        CounterBaitEnabled = not CounterBaitEnabled
+        if CounterBaitEnabled then
+            CounterBaitToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            CounterBaitToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local LEmoteEnabled = false
+    LEmoteToggle.MouseButton1Click:Connect(function()
+        LEmoteEnabled = not LEmoteEnabled
+        if LEmoteEnabled then
+            LEmoteToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            LEmoteToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local AutoCounterM1Enabled = false
+    AutoCounterM1Toggle.MouseButton1Click:Connect(function()
+        AutoCounterM1Enabled = not AutoCounterM1Enabled
+        if AutoCounterM1Enabled then
+            AutoCounterM1Toggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            AutoCounterM1Toggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local NoStunEnabled = false
+    local NoFatigueEnabled = false
+    NoStunToggle.MouseButton1Click:Connect(function()
+        NoStunEnabled = not NoStunEnabled
+        if NoStunEnabled then
+            NoStunToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            NoStunToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    NoFatigueToggle.MouseButton1Click:Connect(function()
+        NoFatigueEnabled = not NoFatigueEnabled
+        if NoFatigueEnabled then
+            NoFatigueToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            NoFatigueToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local AntiKnockbackEnabled = false
+    AntiKnockbackToggle.MouseButton1Click:Connect(function()
+        AntiKnockbackEnabled = not AntiKnockbackEnabled
+        if AntiKnockbackEnabled then
+            AntiKnockbackToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            AntiKnockbackToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    task.spawn(function()
+        while true do
+            local Players = game:GetService("Players")
+            local LiveFolder = workspace:FindFirstChild("Live")
+            if LiveFolder and NoStunEnabled then
+                for _, Player in pairs(Players:GetPlayers()) do
+                    local Character = LiveFolder:FindFirstChild(Player.Name)
+                    if Character then
+                        for _, Accessory in pairs(Character:GetChildren()) do
+                            if Accessory:IsA("Accessory") and (Accessory.Name == "Slowed" or Accessory.Name == "Freeze" or Accessory.Name == "NoDash" or Accessory.Name == "NoBlock" or Accessory.Name == "NoPunch" or Accessory.Name == "NoJump" or Accessory.Name == "ComboStun") then
+                                Accessory:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+            if LiveFolder and AntiKnockbackEnabled then
+                for _, Player in pairs(Players:GetPlayers()) do
+                    local Character = LiveFolder:FindFirstChild(Player.Name)
+                    if Character then
+                        for _, Accessory in pairs(Character:GetChildren()) do
+                            if Accessory:IsA("Accessory") and (Accessory.Name == "Ragdoll" or Accessory.Name == "RagdollSim") then
+                                Accessory:Destroy()
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+    
+    local LocalPlayer = game.Players.LocalPlayer
+    local function SetupNoFatigue()
+        local Humanoid = (LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid")
+        Humanoid:GetPropertyChangedSignal("JumpPower"):Connect(function()
+            if NoFatigueEnabled and Humanoid.JumpPower < 50 then
+                Humanoid.JumpPower = 48.5
+            end
+        end)
+        task.spawn(function()
+            while true do
+                if NoFatigueEnabled then
+                    if Humanoid and Humanoid.JumpPower < 50 then
+                        Humanoid.JumpPower = 48.5
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+    SetupNoFatigue()
+    LocalPlayer.CharacterAdded:Connect(SetupNoFatigue)
+    
+    local M1ReachEnabled = false
+    M1ReachToggle.MouseButton1Click:Connect(function()
+        M1ReachEnabled = not M1ReachEnabled
+        if M1ReachEnabled then
+            M1ReachToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            M1ReachToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local M1ResetEnabled = false
+    M1ResetToggle.MouseButton1Click:Connect(function()
+        M1ResetEnabled = not M1ResetEnabled
+        if M1ResetEnabled then
+            M1ResetToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            M1ResetToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local AntiDeathCounterEnabled = false
+    AntiDeathCounterToggle.MouseButton1Click:Connect(function()
+        AntiDeathCounterEnabled = not AntiDeathCounterEnabled
+        if AntiDeathCounterEnabled then
+            AntiDeathCounterToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+        else
+            AntiDeathCounterToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+        end
+    end)
+    
+    local Player = game.Players.LocalPlayer
+    local Humanoid = (Player.Character or Player.CharacterAdded:Wait()):WaitForChild("Humanoid")
+    local RunService = game:GetService("RunService")
+    local CloseRange = 14
+    local LongRange = 35
+    local CounterRange = 20
+    local CloseRangeMoves = {
+        "rbxassetid://16552234590", "rbxassetid://17889290569", "rbxassetid://17889461810", "rbxassetid://17889458563",
+        "rbxassetid://17889471098", "rbxassetid://16515448089", "rbxassetid://16515520431", "rbxassetid://16515503507",
+        "rbxassetid://15162694192", "rbxassetid://15240176873", "rbxassetid://15240216931", "rbxassetid://15259161390",
+        "rbxassetid://14136436157", "rbxassetid://14001963401", "rbxassetid://13997092940", "rbxassetid://14004222985",
+        "rbxassetid://13378708199", "rbxassetid://13378751717", "rbxassetid://13390230973", "rbxassetid://13295936866",
+        "rbxassetid://13295919399", "rbxassetid://13296577783", "rbxassetid://13491635433", "rbxassetid://13294471966",
+        "rbxassetid://13532604085", "rbxassetid://13532600125", "rbxassetid://13532562418", "rbxassetid://10469643643",
+        "rbxassetid://10469630950", "rbxassetid://10469639222", "rbxassetid://10469493270", "rbxassetid://10479335397",
+        "rbxassetid://17325537719", "rbxassetid://17325522388", "rbxassetid://17325510002", "rbxassetid://17325513870",
+        "rbxassetid://13380255751", "rbxassetid://17857788598", "rbxassetid://17799224866", "rbxassetid://10470104242",
+        "rbxassetid://10503381238", "rbxassetid://17889290569", "rbxassetid://17889471098", "rbxassetid://10479335397",
+        "rbxassetid://18464351556", "rbxassetid://17889461810", "rbxassetid://17889458563", "rbxassetid://10466974800",
+        "rbxassetid://10468665991", "rbxassetid://13380255751", "rbxassetid://12509505723", "rbxassetid://18179181663",
+        "rbxassetid://17857880283", "rbxassetid://12534735382", "rbxassetid://12296882427", "rbxassetid://12272894215",
+        "rbxassetid://15290930205", "rbxassetid://16431491215", "rbxassetid://16515850153", "rbxassetid://16139402582",
+        "rbxassetid://13362587853", "rbxassetid://16139108718", "rbxassetid://14046756619", "rbxassetid://134775406437626",
+        "rbxassetid://104895379416342", "rbxassetid://100059874351664", "rbxassetid://123005629431309",
+        "rbxassetid://98542310119798", "rbxassetid://77509627104305", "rbxassetid://113166426814229",
+        "rbxassetid://13376869471", "rbxassetid://15295895753", "rbxassetid://13370310513", "rbxassetid://125955606488863"
+    }
+    local LongRangeMoves = {
+        "rbxassetid://10479335397", "rbxassetid://10468665991", "rbxassetid://12684185971", "rbxassetid://12509505723",
+        "rbxassetid://12684390285", "rbxassetid://17275150809", "rbxassetid://131820095363270", "rbxassetid://13362587853",
+        "rbxassetid://14046756619", "rbxassetid://15295895753", "rbxassetid://15290930205", "rbxassetid://13380255751"
+    }
+    local CounterMoves = {
+        "rbxassetid://10469493270", "rbxassetid://10469630950", "rbxassetid://10469639222", "rbxassetid://10469643643",
+        "rbxassetid://13532562418", "rbxassetid://13532600125", "rbxassetid://13532604085", "rbxassetid://13294471966",
+        "rbxassetid://13491635433", "rbxassetid://13296577783", "rbxassetid://13295919399", "rbxassetid://13295936866",
+        "rbxassetid://13370310513", "rbxassetid://13390230973", "rbxassetid://13378751717", "rbxassetid://13378708199",
+        "rbxassetid://14004222985", "rbxassetid://13997092940", "rbxassetid://14001963401", "rbxassetid://14136436157",
+        "rbxassetid://15259161390", "rbxassetid://15240216931", "rbxassetid://15240176873", "rbxassetid://15162694192",
+        "rbxassetid://16515503507", "rbxassetid://16515520431", "rbxassetid://16515448089", "rbxassetid://16552234590",
+        "rbxassetid://17889458563", "rbxassetid://17889461810", "rbxassetid://17889471098", "rbxassetid://17889290569",
+        "rbxassetid://123005629431309", "rbxassetid://100059874351664", "rbxassetid://104895379416342", "rbxassetid://134775406437626"
+    }
+    
+    function IsPlayingAnimation(Humanoid, AnimationList)
+        for _, Track in ipairs(Humanoid:GetPlayingAnimationTracks()) do
+            if table.find(AnimationList, Track.Animation.AnimationId) then
+                return true
+            end
+        end
+        return false
+    end
+    
+    function PressBlockKey()
+        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack({
+            [1] = {
+                Goal = "KeyPress",
+                Key = Enum.KeyCode.F,
+            },
+        }))
+    end
+    
+    function ReleaseBlockKey()
+        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack({
+            [1] = {
+                Goal = "KeyRelease",
+                Key = Enum.KeyCode.F,
+            },
+        }))
+    end
+    
+    local Blocking = false
+    
+    function PressM1()
+        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack({
+            [1] = {
+                Goal = "LeftClick",
+                Mobile = true,
+            },
+        }))
+    end
+    
+    function ReleaseM1()
+        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack({
+            [1] = {
+                Goal = "LeftClickRelease",
+                Mobile = true,
+            },
+        }))
+    end
+    
+    function GetTextBoxValue(TextBox, DefaultValue)
+        local cleanedText = TextBox.Text:gsub("%s+", "")
+        local Value = tonumber(cleanedText)
+        if Value then
+            return Value
+        end
+        TextBox.Text = ""
+        return DefaultValue
+    end
+    
+    function ResetTextBoxes()
+        CloseRangeTextBox.Text = ""
+        CloseRangeTextBox.PlaceholderText = "Auto Block (Close range moves)"
+        LongRangeTextBox.Text = ""
+        LongRangeTextBox.PlaceholderText = "Auto Block (Long range moves)"
+        CounterRangeTextBox.Text = ""
+        CounterRangeTextBox.PlaceholderText = "Counter Notifier (and Bait) range"
+    end
+    
+    CloseRangeTextBox.FocusLost:Connect(function()
+        local Value = GetTextBoxValue(CloseRangeTextBox, 14)
+        if CloseRangeTextBox.Text == "" then
+            CloseRangeTextBox.Text = tostring(14)
+        end
+    end)
+    
+    LongRangeTextBox.FocusLost:Connect(function()
+        local Value = GetTextBoxValue(LongRangeTextBox, 35)
+        if LongRangeTextBox.Text == "" then
+            LongRangeTextBox.Text = tostring(35)
+        end
+    end)
+    
+    CounterRangeTextBox.FocusLost:Connect(function()
+        local Value = GetTextBoxValue(CounterRangeTextBox, 20)
+        if CounterRangeTextBox.Text == "" then
+            CounterRangeTextBox.Text = tostring(20)
+        end
+    end)
+    
+    ResetTextBoxes()
+    
+    RunService.Heartbeat:Connect(function()
+        CloseRange = GetTextBoxValue(CloseRangeTextBox, 14)
+        LongRange = GetTextBoxValue(LongRangeTextBox, 35)
+        CounterRange = GetTextBoxValue(CounterRangeTextBox, 20)
+        
+        if not AutoBlockEnabled then
+            if Blocking then
+                ReleaseBlockKey()
+                Blocking = false
+            end
+            return
+        end
+        
+        local CloseTarget = nil
+        local CloseDistance = math.huge
+        local LongTarget = nil
+        local LongDistance = math.huge
+        local PlayersList = game.Players:GetPlayers()
+        local Character = Player.Character
+        local Backpack = Player:WaitForChild("Backpack")
+        
+        if Character and Character:FindFirstChild("HumanoidRootPart") then
+            local CharacterPosition = Character.HumanoidRootPart.Position
+            for _, OtherPlayer in ipairs(PlayersList) do
+                if OtherPlayer ~= Player then
+                    local OtherCharacter = OtherPlayer.Character
+                    if OtherCharacter and OtherCharacter:FindFirstChild("HumanoidRootPart") then
+                        local Distance = (CharacterPosition - OtherCharacter.HumanoidRootPart.Position).Magnitude
+                        if Distance < CloseRange and Distance < CloseDistance then
+                            CloseTarget = OtherPlayer
+                            CloseDistance = Distance
+                        end
+                        if Distance < LongRange and Distance < LongDistance then
+                            LongTarget = OtherPlayer
+                            LongDistance = Distance
+                        end
+                    end
+                end
+            end
+        end
+        
+        local HasCounter = false
+        for _, Tool in ipairs(Backpack:GetChildren()) do
+            if Tool:IsA("Tool") and (Tool.Name == "Prey's Peril" or Tool.Name == "Split Second Counter") then
+                HasCounter = true
+                break
+            end
+        end
+        
+        if LongTarget and IsPlayingAnimation(LongTarget.Character:WaitForChild("Humanoid"), LongRangeMoves) and not Blocking then
+            Blocking = true
+            PressBlockKey()
+            task.wait(0.15)
+            Blocking = false
+            ReleaseBlockKey()
+        elseif CloseTarget and IsPlayingAnimation(CloseTarget.Character:WaitForChild("Humanoid"), CloseRangeMoves) and not Blocking then
+            Blocking = true
+            PressBlockKey()
+            task.wait(0.15)
+            Blocking = false
+            ReleaseBlockKey()
+            if M1AfterBlockEnabled then
+                PressM1()
+                wait(0.1)
+                ReleaseM1()
+            end
+        end
+    end)
+    
+    local M1ResetPlayer = game.Players.LocalPlayer
+    local M1ResetDelay = 0.19
+    local M1ResetRunService = game:GetService("RunService")
+    
+    function SetupM1Reset(Character)
+        local Humanoid = Character:WaitForChild("Humanoid")
+        local Animator = Humanoid:WaitForChild("Animator")
+        M1ResetRunService.Heartbeat:Connect(function()
+            if M1ResetEnabled then
+                for _, Track in ipairs(Animator:GetPlayingAnimationTracks()) do
+                    local AnimationId = Track.Animation and Track.Animation.AnimationId
+                    if AnimationId == "rbxassetid://10480793962" or AnimationId == "rbxassetid://10480796021" then
+                        local TimeRemaining = Track.Length - Track.TimePosition
+                        if M1ResetDelay < TimeRemaining then
+                            task.delay(TimeRemaining - M1ResetDelay, function()
+                                if Track.IsPlaying then
+                                    Track:Stop()
+                                end
+                            end)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    
+    if M1ResetPlayer.Character then
+        SetupM1Reset(M1ResetPlayer.Character)
+    end
+    M1ResetPlayer.CharacterAdded:Connect(SetupM1Reset)
+    
+    local M1ReachRunService = game:GetService("RunService")
+    local M1ReachPlayer = game.Players.LocalPlayer
+    local TweenService = game:GetService("TweenService")
+    local M1ReachDistance = 16
+    local M1ReachMoves = {
+        "rbxassetid://10469493270", "rbxassetid://10469630950", "rbxassetid://13532562418", "rbxassetid://13532600125",
+        "rbxassetid://13491635433", "rbxassetid://13296577783", "rbxassetid://13370310513", "rbxassetid://13390230973",
+        "rbxassetid://14004222985", "rbxassetid://13997092940", "rbxassetid://15259161390", "rbxassetid://15240216931",
+        "rbxassetid://16515503507", "rbxassetid://16515520431", "rbxassetid://17889458563", "rbxassetid://17889461810",
+        "rbxassetid://123005629431309", "rbxassetid://100059874351664"
+    }
+    
+    function SetupM1Reach()
+        local Character = M1ReachPlayer.Character or M1ReachPlayer.CharacterAdded:Wait()
+        local RootPart = Character:WaitForChild("HumanoidRootPart")
+        
+        local function FindClosestTarget()
+            if not M1ReachEnabled then
+                return nil
+            end
+            local ClosestTarget = nil
+            local ClosestDistance = M1ReachDistance
+            for _, OtherPlayer in pairs(game.Players:GetPlayers()) do
+                if OtherPlayer ~= M1ReachPlayer and OtherPlayer.Character then
+                    local OtherRootPart = OtherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if OtherRootPart then
+                        local Distance = (OtherRootPart.Position - RootPart.Position).magnitude
+                        if Distance <= M1ReachDistance and Distance < ClosestDistance then
+                            ClosestDistance = Distance
+                            ClosestTarget = OtherRootPart
+                        end
+                    end
+                end
+            end
+            return ClosestTarget
+        end
+        
+        local function TweenToPosition(Position)
+            TweenService:Create(RootPart, TweenInfo.new(0.09, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+                CFrame = Position,
+            }):Play()
+        end
+        
+        Character:WaitForChild("Humanoid").AnimationPlayed:Connect(function(AnimationTrack)
+            if not M1ReachEnabled then
+                return
+            end
+            if table.find(M1ReachMoves, AnimationTrack.Animation.AnimationId) then
+                local Target = FindClosestTarget()
+                if Target then
+                    local LookVector = Target.CFrame.LookVector
+                    local DotProduct = LookVector:Dot((RootPart.Position - Target.Position).unit)
+                    local TargetPosition = Target.Position
+                    local Offset = nil
+                    if DotProduct > 0 then
+                        Offset = 0.3
+                    else
+                        Offset = -0.3
+                    end
+                    local NewCFrame = CFrame.lookAt(TargetPosition + LookVector * Offset, Target.Position)
+                    TweenToPosition(NewCFrame)
+                end
+            end
+        end)
+    end
+    
+    M1ReachPlayer.CharacterAdded:Connect(SetupM1Reach)
+    SetupM1Reach()
+    
+    local CounterNotifierPlayers = game:GetService("Players")
+    local CounterNotifierRunService = game:GetService("RunService")
+    local CounterNotifierStarterGui = game:GetService("StarterGui")
+    local WhiteCounterAnimation = "rbxassetid://15311685628"
+    local BlueCounterAnimation = "rbxassetid://12351854556"
+    local CounterNotifierCooldowns = {}
+    local CounterHighlights = {}
+    
+    function AddCounterHighlight(Character, Color)
+        if not CounterHighlights[Character] then
+            local Highlight = Instance.new("Highlight")
+            Highlight.FillColor = Color
+            Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            Highlight.FillTransparency = 0.5
+            Highlight.OutlineTransparency = 0
+            Highlight.Parent = Character
+            CounterHighlights[Character] = Highlight
+        end
+    end
+    
+    function RemoveCounterHighlight(Character)
+        local Highlight = CounterHighlights[Character]
+        if Highlight then
+            Highlight:Destroy()
+            CounterHighlights[Character] = nil
+        end
+    end
+    
+    function SendNotification(Title, Text, Duration)
+        CounterNotifierStarterGui:SetCore("SendNotification", {
+            Title = Title,
+            Text = Text,
+            Duration = Duration,
+        })
+    end
+    
+    function GetCounterAnimation(Humanoid)
+        for _, Track in pairs(Humanoid:GetPlayingAnimationTracks()) do
+            if Track.Animation and (Track.Animation.AnimationId == WhiteCounterAnimation or Track.Animation.AnimationId == BlueCounterAnimation) then
+                return Track.Animation.AnimationId
+            end
+        end
+        return nil
+    end
+    
+    function CheckCounterMoves()
+        local LocalPlayer = CounterNotifierPlayers.LocalPlayer
+        local Character = LocalPlayer.Character
+        if not Character then
+            return
+        end
+        local RootPart = Character:FindFirstChild("HumanoidRootPart")
+        if not RootPart then
+            return
+        end
+        for _, Player in pairs(CounterNotifierPlayers:GetPlayers()) do
+            if Player ~= LocalPlayer and Player.Character then
+                local OtherCharacter = Player.Character
+                local OtherRootPart = OtherCharacter:FindFirstChild("HumanoidRootPart")
+                local OtherHumanoid = OtherCharacter:FindFirstChild("Humanoid")
+                if OtherRootPart and OtherHumanoid and (RootPart.Position - OtherRootPart.Position).Magnitude <= CounterRange then
+                    local CounterAnimation = GetCounterAnimation(OtherHumanoid)
+                    if CounterAnimation then
+                        local CurrentTime = tick()
+                        if not CounterNotifierCooldowns[Player] or 5 < CurrentTime - CounterNotifierCooldowns[Player] then
+                            CounterNotifierCooldowns[Player] = CurrentTime
+                            local HighlightColor = CounterAnimation == WhiteCounterAnimation and Color3.fromRGB(240, 240, 240) or Color3.fromRGB(0, 0, 254)
+                            AddCounterHighlight(OtherCharacter, HighlightColor)
+                            SendNotification("Notifier", Player.Name .. " used a counter move", 1.2)
+                            task.delay(17.5, function()
+                                RemoveCounterHighlight(OtherCharacter)
+                                SendNotification("Notifier", Player.Name .. "'s counter move cooldown has ended", 2)
+                            end)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    local DeathCounterHighlights = {}
+    
+    function AddDeathCounterHighlight(Character, Color)
+        if not DeathCounterHighlights[Character] then
+            local Highlight = Instance.new("Highlight")
+            Highlight.FillColor = Color
+            Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            Highlight.FillTransparency = 0.5
+            Highlight.OutlineTransparency = 0
+            Highlight.Parent = Character
+            DeathCounterHighlights[Character] = Highlight
+        end
+    end
+    
+    function RemoveDeathCounterHighlight(Character)
+        local Highlight = DeathCounterHighlights[Character]
+        if Highlight then
+            Highlight:Destroy()
+            DeathCounterHighlights[Character] = nil
+        end
+    end
+    
+    function SendDeathCounterNotification(Title, Text, Duration)
+        game.StarterGui:SetCore("SendNotification", {
+            Title = Title,
+            Text = Text,
+            Duration = Duration,
+        })
+    end
+    
+    function AddDeathCounterText(Character, Text)
+        local Head = Character:FindFirstChild("Head")
+        if not Head then
+            return
+        end
+        local Billboard = Instance.new("BillboardGui")
+        Billboard.Name = "DeathCounterText"
+        Billboard.Size = UDim2.new(8, 0, 2, 0)
+        Billboard.StudsOffset = Vector3.new(0, 2, 0)
+        Billboard.Adornee = Head
+        Billboard.AlwaysOnTop = true
+        Billboard.MaxDistance = 0
+        Billboard.Parent = Head
+        local TextLabel = Instance.new("TextLabel")
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Text = Text
+        TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        TextLabel.TextScaled = true
+        TextLabel.Font = Enum.Font.SourceSansBold
+        TextLabel.Parent = Billboard
+    end
+    
+    function RemoveDeathCounterText(Character)
+        local Head = Character:FindFirstChild("Head")
+        if Head then
+            local Text = Head:FindFirstChild("DeathCounterText")
+            if Text then
+                Text:Destroy()
+            end
+        end
+    end
+    
+    function CheckDeathCounters()
+        local LiveFolder = workspace:FindFirstChild("Live")
+        if LiveFolder then
+            for _, Character in ipairs(LiveFolder:GetChildren()) do
+                local PlayerName = Character.Name
+                if game.Players:FindFirstChild(PlayerName) and Character:FindFirstChildWhichIsA("Accessory", true) then
+                    for _, Accessory in ipairs(Character:GetDescendants()) do
+                        if Accessory:IsA("Accessory") and Accessory.Name == "Counter" then
+                            if not DeathCounterHighlights[Character] then
+                                AddDeathCounterHighlight(Character, Color3.fromRGB(255, 0, 0))
+                                SendDeathCounterNotification("Notifier", PlayerName .. " used Death Counter", 1)
+                                AddDeathCounterText(Character, "Death Counter")
+                                task.delay(10.1, function()
+                                    RemoveDeathCounterHighlight(Character)
+                                    SendDeathCounterNotification("Notifier", PlayerName .. "'s Death Counter ended", 2)
+                                    RemoveDeathCounterText(Character)
+                                end)
+                                break
+                            else
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    local CounterBaitPlayers = game:GetService("Players")
+    local LocalPlayer = CounterBaitPlayers.LocalPlayer
+    local Character = nil
+    local RootPart = nil
+    local Humanoid = nil
+    
+    function SetupCounterBait(NewCharacter)
+        Character = NewCharacter
+        RootPart = Character:WaitForChild("HumanoidRootPart")
+        Humanoid = Character:WaitForChild("Humanoid")
+    end
+    
+    if LocalPlayer.Character then
+        SetupCounterBait(LocalPlayer.Character)
+    end
+    LocalPlayer.CharacterAdded:Connect(SetupCounterBait)
+    
+    local BaitPlayer = game.Players.LocalPlayer
+    local BaitCharacter = BaitPlayer.Character or BaitPlayer.CharacterAdded:Wait()
+    local LAnimation = Instance.new("Animation")
+    LAnimation.AnimationId = "rbxassetid://18614546390"
+    local BaitHumanoid = BaitCharacter:WaitForChild("Humanoid")
+    local Animator = BaitHumanoid:FindFirstChildOfClass("Animator")
+    local CounterAnimations = {
+        "rbxassetid://12351854556",
+        "rbxassetid://15311685628",
+        "rbxassetid://78521642007560"
+    }
+    local BaitCooldown = false
+    local TextChatService = game:GetService("TextChatService")
+    
+    function CheckCounterBait()
+        if CounterBaitEnabled and Character and RootPart and BaitHumanoid then
+            local CounterDetected = false
+            for _, Player in pairs(CounterBaitPlayers:GetPlayers()) do
+                if Player ~= BaitPlayer and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character:FindFirstChild("Humanoid") and (Player.Character.HumanoidRootPart.Position - RootPart.Position).Magnitude <= CounterRange then
+                    for _, Track in pairs(Player.Character.Humanoid:GetPlayingAnimationTracks()) do
+                        if Track.Animation then
+                            for _, CounterAnim in pairs(CounterAnimations) do
+                                if Track.Animation.AnimationId == CounterAnim then
+                                    CounterDetected = true
+                                    break
+                                end
+                            end
+                        end
+                        if CounterDetected then
+                            break
+                        end
+                    end
+                end
+                if CounterDetected then
+                    break
+                end
+            end
+            if CounterDetected and not BaitCooldown then
+                TextChatService.TextChannels.RBXGeneral:SendAsync(BaitMessageTextBox.Text)
+                BaitCooldown = true
+                task.wait(0.2)
+                if LEmoteEnabled and Animator then
+                    local LTrack = Animator:LoadAnimation(LAnimation)
+                    LTrack:Play()
+                    task.wait(1)
+                    LTrack:Stop()
+                end
+            end
+            if not CounterDetected then
+                BaitCooldown = false
+            end
+        end
+    end
+    
+    local ShowCDEnabled = false
+    local ShowCDRunning = false
+    local ShowCDThread = nil
+    local CooldownConnections = {}
+    
+    function CreateEvasiveTimer(Duration)
+        local TimerActive = true
+        local TimerGUI = Instance.new("ScreenGui")
+        TimerGUI.Name = "EvasiveTimer"
+        TimerGUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        TimerGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        local Label = Instance.new("TextLabel")
+        Label.Name = "EvasiveLabel"
+        Label.Parent = TimerGUI
+        Label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Label.BackgroundTransparency = 1
+        Label.Position = UDim2.new(-0.006, 0, 0.809, 0)
+        Label.Size = UDim2.new(0.102, 0, 0.05, 0)
+        Label.Font = Enum.Font.SourceSansBold
+        Label.Text = "Evasive:"
+        Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Label.TextScaled = true
+        Label.TextSize = 14
+        Label.TextTransparency = 0.1
+        Label.TextWrapped = true
+        
+        local TimerLabel = Instance.new("TextLabel")
+        TimerLabel.Name = "Timer"
+        TimerLabel.Parent = TimerGUI
+        TimerLabel.BackgroundTransparency = 1
+        TimerLabel.Position = UDim2.new(0.075, 0, 0.811, 0)
+        TimerLabel.Size = UDim2.new(0.05, 0, 0.05, 0)
+        TimerLabel.Font = Enum.Font.SourceSansBold
+        TimerLabel.Text = ""
+        TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TimerLabel.TextSize = 30
+        TimerLabel.TextWrapped = true
+        
+        local Interval = 0.1
+        for Time = Duration, 0, -Interval do
+            TimerLabel.Text = string.format("%.1f", Time)
+            wait(Interval)
+        end
+        TimerLabel.Text = "0.0"
+        TimerGUI:Destroy()
+        TimerActive = false
+    end
+    
+    function CreateDashTimer(Duration)
+        local TimerGUI = Instance.new("ScreenGui")
+        TimerGUI.Name = "DashTimer"
+        TimerGUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        TimerGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        local Label = Instance.new("TextLabel")
+        Label.Name = "DashLabel"
+        Label.Parent = TimerGUI
+        Label.BackgroundTransparency = 1
+        Label.Position = UDim2.new(-0.017, 0, 0.866, 0)
+        Label.Size = UDim2.new(0.102, 0, 0.05, 0)
+        Label.Font = Enum.Font.SourceSansBold
+        Label.Text = "Dash:"
+        Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Label.TextScaled = true
+        Label.TextSize = 14
+        Label.TextTransparency = 0.1
+        Label.TextWrapped = true
+        
+        local TimerLabel = Instance.new("TextLabel")
+        TimerLabel.Name = "Timer"
+        TimerLabel.Parent = TimerGUI
+        TimerLabel.BackgroundTransparency = 1
+        TimerLabel.Position = UDim2.new(0.05, 0, 0.866, 0)
+        TimerLabel.Size = UDim2.new(0.05, 0, 0.05, 0)
+        TimerLabel.Font = Enum.Font.SourceSansBold
+        TimerLabel.Text = ""
+        TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TimerLabel.TextSize = 30
+        TimerLabel.TextWrapped = true
+        
+        local Interval = 0.1
+        for Time = Duration, 0, -Interval do
+            TimerLabel.Text = string.format("%.1f", Time)
+            wait(Interval)
+        end
+        TimerGUI:Destroy()
+    end
+    
+    function CreateSideDashTimer(Duration)
+        local TimerGUI = Instance.new("ScreenGui")
+        TimerGUI.Name = "SideDashTimer"
+        TimerGUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        TimerGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        local Label = Instance.new("TextLabel")
+        Label.Name = "SideDashLabel"
+        Label.Parent = TimerGUI
+        Label.BackgroundTransparency = 1
+        Label.Position = UDim2.new(0, 0, 0.921, 0)
+        Label.Size = UDim2.new(0.102, 0, 0.05, 0)
+        Label.Font = Enum.Font.SourceSansBold
+        Label.Text = "SideDash:"
+        Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Label.TextScaled = true
+        Label.TextSize = 14
+        Label.TextTransparency = 0.1
+        Label.TextWrapped = true
+        
+        local TimerLabel = Instance.new("TextLabel")
+        TimerLabel.Name = "Timer"
+        TimerLabel.Parent = TimerGUI
+        TimerLabel.BackgroundTransparency = 1
+        TimerLabel.Position = UDim2.new(0.085, 0, 0.921, 0)
+        TimerLabel.Size = UDim2.new(0.05, 0, 0.05, 0)
+        TimerLabel.Font = Enum.Font.SourceSansBold
+        TimerLabel.Text = ""
+        TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TimerLabel.TextSize = 30
+        TimerLabel.TextWrapped = true
+        
+        local Interval = 0.1
+        for Time = Duration, 0, -Interval do
+            TimerLabel.Text = string.format("%.1f", Time)
+            wait(Interval)
+        end
+        TimerGUI:Destroy()
+    end
+    
+    function SetupCooldownDisplay()
+        if ShowCDThread then
+            return
+        end
+        local Player = game.Players.LocalPlayer
+        local Animator = (Player.Character or Player.CharacterAdded:Wait()):WaitForChild("Humanoid"):WaitForChild("Animator")
+        local SideDashAnimations = {
+            ["rbxassetid://10480796021"] = true,
+            ["rbxassetid://10480793962"] = true,
+        }
+        table.insert(CooldownConnections, Animator.AnimationPlayed:Connect(function(Track)
+            if Track.Animation and SideDashAnimations[Track.Animation.AnimationId] then
+                task.wait(0.1)
+                CreateSideDashTimer(1.9)
+            end
+        end))
+        
+        local DashAnimations = {
+            ["rbxassetid://10491993682"] = true,
+            ["rbxassetid://10479335397"] = true,
+        }
+        table.insert(CooldownConnections, Animator.AnimationPlayed:Connect(function(Track)
+            if Track.Animation and DashAnimations[Track.Animation.AnimationId] then
+                task.wait(0.2)
+                CreateDashTimer(4.8)
+            end
+        end))
+        
+        local LiveFolder = workspace:WaitForChild("Live")
+        local function CheckEvasive()
+            local Character = LiveFolder:FindFirstChild(Player.Name)
+            if Character and Character:FindFirstChild("RagdollCancel") and not TimerActive then
+                CreateEvasiveTimer(30)
+            end
+        end
+        
+        ShowCDThread = task.spawn(function()
+            while ShowCDRunning do
+                CheckEvasive()
+                task.wait(0.2)
+            end
+            ShowCDThread = nil
+        end)
+    end
+    
+    ShowCDToggle.MouseButton1Click:Connect(function()
+        ShowCDEnabled = not ShowCDEnabled
+        if ShowCDEnabled then
+            ShowCDToggle.BackgroundColor3 = Color3.fromRGB(192, 192, 192)
+            ShowCDRunning = true
+            SetupCooldownDisplay()
+        else
+            ShowCDToggle.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
+            ShowCDRunning = false
+            for _, Connection in ipairs(CooldownConnections) do
+                Connection:Disconnect()
+            end
+            CooldownConnections = {}
+            ShowCDThread = nil
+        end
+    end)
+    
+    local AntiDeathCounterPlayer = game:GetService("Players").LocalPlayer
+    local function SetupAntiDeathCounter()
+        local Character = AntiDeathCounterPlayer.Character or AntiDeathCounterPlayer.CharacterAdded:Wait()
+        local Humanoid = Character:WaitForChild("Humanoid")
+        local RootPart = Character:WaitForChild("HumanoidRootPart")
+        local DeathCounterAnimation = "rbxassetid://11343250001"
+        
+        local function BypassDeathCounter()
+            local OriginalPosition = RootPart.CFrame
+            task.wait(1.5)
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Combat Gui",
+                Text = "Bypassing Death Counter",
+                Duration = 2.5,
+            })
+            task.wait(2)
+            Character:SetPrimaryPartCFrame(CFrame.new(-93435, -490, -4673))
+            local VoidPart = Instance.new("Part")
+            VoidPart.Parent = workspace.Terrain
+            VoidPart.Name = "Void"
+            VoidPart.Transparency = 1
+            VoidPart.Anchored = true
+            VoidPart.Size = Vector3.new(2048, 1, 2048)
+            VoidPart.Position = Vector3.new(0, workspace.FallenPartsDestroyHeight, 0)
+            VoidPart.Locked = true
+            game:GetService("RunService").Heartbeat:Connect(function()
+                if Character and Character:FindFirstChild("HumanoidRootPart") then
+                    VoidPart.Position = Vector3.new(Character.HumanoidRootPart.Position.X, workspace.FallenPartsDestroyHeight, Character.HumanoidRootPart.Position.Z)
+                end
+            end)
+            task.wait(3)
+            Character:SetPrimaryPartCFrame(OriginalPosition)
+            local Player = AntiDeathCounterPlayer
+            workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+            workspace.CurrentCamera.CameraSubject = Player.Character:FindFirstChildWhichIsA("Humanoid")
+            Player.CameraMinZoomDistance = 0.5
+            Player.CameraMaxZoomDistance = 400
+            Player.CameraMode = Enum.CameraMode.Classic
+            Player.Character.Head.Anchored = false
+        end
+        
+        Humanoid.AnimationPlayed:Connect(function(Track)
+            if AntiDeathCounterEnabled and Track.Animation.AnimationId == DeathCounterAnimation then
+                BypassDeathCounter()
+            end
+        end)
+    end
+    SetupAntiDeathCounter()
+    AntiDeathCounterPlayer.CharacterAdded:Connect(SetupAntiDeathCounter)
+    
+    CounterNotifierRunService.Heartbeat:Connect(function()
+        if CounterNotifierEnabled then
+            CheckCounterMoves()
+        end
+    end)
+    
+    CounterNotifierRunService.Heartbeat:Connect(function()
+        CheckCounterBait()
+    end)
+    
+    task.spawn(function()
+        while true do
+            if DeathCounterNotifierEnabled then
+                CheckDeathCounters()
+            end
+            task.wait(0.1)
+        end
+    end)
+    
+else
+    wait(0.1)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Uh oh",
+        Text = "Combat gui won't work properly in this game",
+        Duration = 2,
+    })
+end
